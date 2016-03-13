@@ -1,0 +1,23 @@
+{
+  "name": "dmxproxy",
+  "version": "2.0.0",
+  "description": "DMX PROXY",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "dmx",
+    "enttec",
+    "artnet",
+    "proxy"
+  ],
+  "author": "jewe @ sedna",
+  "license": "ISC",
+  "bin": {
+    "dmxproxy": "./app.js"
+  },
+  "dependencies": {
+    "optimist": "^0.6.1"
+  }
+}
