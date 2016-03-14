@@ -8,9 +8,38 @@ var TCP = module.exports = {
     SOCKET: net.createServer(function(tcpsocket) {
         tcpsocket.on('data', TCP.HANDLER);
     }),
+    CONNECT: function() {
+
+        if (TCP.CLIENT != null) {
+            TCP.CLIENT.destroy();
+        }
+        if (TCP.WATCHER) {
+            clearTimeout(TCP.WATCHER);
+            TCP.WATCHER = null;
+        }
+        TCP.CLIENT = net.connect(args.p, args.h, function() {
+            LOGGER.LOG("Connected Socket");
+        })
+        TCP.CLIENT.on("error", function(err) {
+            LOGGER.LOG("Socket Error.");
+            if(!TCP.ERRORHOLD){
+            	TCP.ERRORHOLD = true;
+            	LOGGER.LOG("Try to reconnect in 5 seconds");
+            	setTimeout(function(){
+            		TCP.CONNECT();
+            		TCP.ERRORHOLD = null;
+            	},5000)
+            }
+        })
+        TCP.CLIENT.on("end", function(err) {
+            LOGGER.LOG("Socket disconnected. Try to reconnect in 5 seconds...");
+            TCP.WATCHER = setTimeout(TCP.CONNECT, 5000);
+        });
+
+    },
     HANDLER: function(str) {
 
-    	var DMX = require('./dmx.js');
+        var DMX = require('./dmx.js');
 
         var packet = DMX.HEADER.concat(DMX.SEQ).concat(DMX.PHY).concat(DMX.UNIVERSE).concat(DMX.LENGTH);
         var data = args.t ? DMX.EMPTYDATA() : DMX.DATA;
@@ -57,10 +86,13 @@ var TCP = module.exports = {
 
 
     },
-    EMIT : function(data){
-    	var client = net.connect(args.p,args.h,function(){
-    		client.end(data+'\n');
-    	});
-    	client.on("error",LOGGER.LOG);
+    EMIT: function(data) {
+        if (TCP.CLIENT != null) {
+            TCP.CLIENT.write(data + "\n");
+        }
     }
+}
+
+if (args.l) {
+    TCP.CONNECT();
 }
