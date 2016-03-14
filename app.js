@@ -3,27 +3,41 @@
 const dgram = require('dgram');
 const net = require('net');
 const util = require('util');
+const fs = require('fs');
+const DATASTORE = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + "/.dmxdata/";
 
 const args = require('optimist')
+    
     .usage('Usage: $0 -p [tcpport] -h [host] -u [universe] -s [store] -c [constant] -l [listen] -t [trigger] -d [delay]')
+    
     .boolean('v')
+
     .boolean('s')
     .alias('s', 'store')
+
     .boolean('c')
     .alias('c', 'constant')
-    .boolean('l')
-    .alias('t', 'trigger')
+
     .boolean('t')
-    .alias('d', 'delay')
+    .alias('t', 'trigger')
+    
     .boolean('d')
+    .alias('d', 'delay')
     .default('d', 500)
+
+    .boolean('l')
     .alias('l', 'listen')
+
+    .string('h')
     .alias('h', 'host')
     .default('h', "127.0.0.1")
+
     .alias('u', 'universe')
     .default('u', 0)
+
     .default('p', 4040)
     .alias('p', 'port')
+
     .argv;
 
 const LOGGER = {
@@ -41,8 +55,8 @@ const DMX = {
     HOST: args.h,
     PORT: 6454,
     HEADER: [65, 114, 116, 45, 78, 101, 116, 0, 0, 80, 0, 14],
-    SEQ: [0],
-    PHY: [0],
+    SEQ: [0x00],
+    PHY: [0x00],
     UNIVERSE: [args.u, 0],
     LENGTH: [0x02, 0x00],
 
@@ -55,16 +69,20 @@ const DMX = {
 
     HANDLER: function(data) {
 
+        //TODO: Handle incoming;
+        console.log(data);
+
     },
     SEND: function() {
 
-        var data = DMX.HEADER.concat(DMX.UNIVERSE).concat(DMX.LENGTH).concat(DMX.DATA);
+        var data = DMX.HEADER.concat(DMX.SEQ).concat(DMX.PHY).concat(DMX.UNIVERSE).concat(DMX.LENGTH).concat(DMX.DATA);
         var buf = new Buffer(data);
 
         DMX.SOCKET.send(buf, 0, buf.length, DMX.PORT, DMX.HOST, function() {
             LOGGER.LOG(buf);
         });
-    }
+    },
+    WRITETIMER : null
 };
 
 const TCP = {
@@ -109,19 +127,42 @@ const TCP = {
                     DMX.DATA = DMX.EMPTYDATA();
                 }, args.d);
             }
+        } else if( args.s ){
+            if( DMX.WRITETIMER != null ){
+                clearTimeout(DMX.WRITETIMER);
+            }
+
+            DMX.WRITETIMER = setTimeout(function(){
+                fs.writeFile(DATASTORE + DMX.HOST + ".dat",JSON.stringify(DMX.DATA));
+            },100);
         }
+
+
     }
 };
 
+if (args.s) {
+    if (!fs.existsSync(DATASTORE)) {
+        fs.mkdirSync(DATASTORE);
+    }
+    if( fs.existsSync(DATASTORE + DMX.HOST + ".dat") ){
+        DMX.DATA = JSON.parse( fs.readFileSync(DATASTORE + DMX.HOST + ".dat") );
+    }
+}
+
+if( args.c ){
+    setInterval(DMX.SEND,1000/args.f);
+}
+
 DMX.SOCKET.on('error', LOGGER.ERROR);
-TCP.SOCKET.on('error',LOGGER.ERROR);
+TCP.SOCKET.on('error', LOGGER.ERROR);
 
 if (args.l) {
     DMX.SOCKET.bind(DMX.PORT, function() {
         LOGGER.LOG('SOCKET BINDED TO PORT ' + DMX.PORT);
     });
     DMX.SOCKET.on('message', DMX.HANDLER);
-    
+
 } else {
     TCP.SOCKET.listen(TCP.PORT);
 }
