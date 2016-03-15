@@ -1,0 +1,134 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+	background: rgb(19, 19, 19);
+    background: -moz-linear-gradient(top, rgb(19, 19, 19) 0%, rgb(76, 76, 76) 100%);
+    background: -webkit-linear-gradient(top, rgb(19, 19, 19) 0%, rgb(19, 19, 76) 100%);
+    background: linear-gradient(to bottom, rgb(19, 19, 19) 0%, rgb(76, 76, 76) 100%);
+    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#4c4c4c', endColorstr='#131313', GradientType=0);
+    font-family: monospace;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.controls {
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+    font-size: 16px;
+    height: 550px;
+    line-height: 500px;
+}
+
+.controls::-webkit-scrollbar {
+    height: 40px;
+    background-image: -webkit-repeating-radial-gradient(center center, rgba(125, 125, 125, .2), rgba(125, 125, 125, .2) 1px, transparent 1px, transparent 100%);
+    background-image: -moz-repeating-radial-gradient(center center, rgba(125, 125, 125, .2), rgba(125, 125, 125, .2) 1px, transparent 1px, transparent 100%);
+    background-image: -ms-repeating-radial-gradient(center center, rgba(125, 125, 125, .2), rgba(125, 125, 125, .2) 1px, transparent 1px, transparent 100%);
+    background-image: repeating-radial-gradient(center center, rgba(125, 125, 125, .2), rgba(125, 125, 125, .2) 1px, transparent 1px, transparent 100%);
+    -webkit-background-size: 3px 3px;
+    -moz-background-size: 3px 3px;
+    background-size: 3px 3px;
+}
+
+.controls::-webkit-scrollbar-thumb {
+    border: 1px solid gray;
+    height: 36px;
+    width: 36px;
+    border-radius: 3px;
+    background: #DDD;
+    cursor: pointer;
+    -webkit-appearance: none;
+    cursor: ew-resize;
+}
+
+
+.slider{
+	position: relative;
+	display: inline-block;
+	width: 40px;
+	height: 400px;
+	vertical-align: top;
+	margin: 0px 5px
+}
+
+.slider .label{
+	position: absolute;
+	top: 0px;
+	background: black;
+	color: white;
+	text-align: right;
+	line-height: 40px;
+	height: 40px;
+	width: 40px;
+	font-size: 20px;
+}
+
+.slider .pulse{
+	position: absolute;
+	bottom: -90px;
+	left: -1px;
+	text-align: center;
+	line-height: 40px;
+	height: 40px;
+	width: 40px;
+	font-size: 20px;
+	border: 1px solid gray;
+    border-radius: 3px;
+    background: #DDD;
+    color: #f60;
+    cursor: pointer;
+}
+
+input[type='range'] {
+    display: inline-block;
+    position: absolute;
+    top: 220px; left: 0px;
+    padding: 0;
+    width: 400px;
+    height: 40px;
+    margin: 10px;
+    -webkit-appearance: none;
+    -webkit-transform: rotate3d(0, 0, 1, -90deg);
+    transform: rotate3d(0, 0, 1, -90deg);
+    margin: 0px -180px;
+    vertical-align: middle;
+    background: none;
+    outline: none;
+    background-image: -webkit-repeating-radial-gradient(center center, rgba(125, 125, 125, .2), rgba(125, 125, 125, .2) 1px, transparent 1px, transparent 100%);
+    background-image: -moz-repeating-radial-gradient(center center, rgba(125, 125, 125, .2), rgba(125, 125, 125, .2) 1px, transparent 1px, transparent 100%);
+    background-image: -ms-repeating-radial-gradient(center center, rgba(125, 125, 125, .2), rgba(125, 125, 125, .2) 1px, transparent 1px, transparent 100%);
+    background-image: repeating-radial-gradient(center center, rgba(125, 125, 125, .2), rgba(125, 125, 125, .2) 1px, transparent 1px, transparent 100%);
+    -webkit-background-size: 3px 3px;
+    -moz-background-size: 3px 3px;
+    background-size: 3px 3px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    border: 1px solid gray;
+    height: 36px;
+    width: 36px;
+    border-radius: 3px;
+    background: #DDD;
+    cursor: pointer;
+    -webkit-appearance: none;
+    cursor: n-resize;
+}
+
+
+input[type=range]::-moz-range-thumb {
+    border: 1px solid gray;
+    height: 36px;
+    width: 36px;
+    border-radius: 3px;
+    background: #DDD;
+    cursor: pointer;
+    -webkit-appearance: none;
+    cursor: ew-resize;
+}
+

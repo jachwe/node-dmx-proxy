@@ -29,34 +29,17 @@ if (args.s) {
     LOGGER.LOG('Init Storing values to ' + DATAFILE);
 }
 
+
+LOGGER.LOG("Listening for Artnet Data.");
+
 if (args.t) {
     LOGGER.LOG("Trigger Mode is enabled.");
     LOGGER.LOG("Zero values will be sent " + args.d + "ms after setting.");
-}
-
-if( args.w ){
-    var WS = require("./ws.js");
-}
-
-DMX.SOCKET.on('error', LOGGER.ERROR);
-TCP.SOCKET.on('error', LOGGER.ERROR);
-
-if (args.l) {
-    LOGGER.LOG("Listening for Artnet Data.");
-    LOGGER.LOG("Forwardind to TCP Port " + TCP.PORT + " on host " + args.h);
-    DMX.SOCKET.bind(DMX.PORT, function() {
-        LOGGER.LOG('UDP socket binded on port ' + DMX.PORT);
-    });
-    DMX.SOCKET.on('message', DMX.HANDLER);
-
-} else {
-    TCP.SOCKET.listen(TCP.PORT, function() {
-        LOGGER.LOG('Server listening on port ' + TCP.PORT);
-        LOGGER.LOG('Forwarding data to ' + DMX.HOST + ' on universe ' + args.u);
-    });
 }
 
 if (args.c) {
     setInterval(DMX.SEND, 1000 / args.f);
     LOGGER.LOG('Constantly sending data with ' + args.f + ' FPS');
 }
+
+require('./web.js');

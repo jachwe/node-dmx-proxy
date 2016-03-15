@@ -1,6 +1,8 @@
 const args = require('./opts.js').argv;
 const dgram = require('dgram');
 const LOGGER = require("./log.js");
+const WS = require('./ws.js');
+const tweenr = require('tweenr')();
 
 var DMX = module.exports = {
     HOST: args.h,
@@ -11,6 +13,8 @@ var DMX = module.exports = {
     UNIVERSE: [args.u, 0],
     LENGTH: [0x02, 0x00],
 
+    LASTPACKET: null,
+
     EMPTYDATA: function() {
         return Array.apply(null, Array(512)).map(Number.prototype.valueOf, 0)
     },
@@ -19,7 +23,8 @@ var DMX = module.exports = {
     SOCKET: dgram.createSocket("udp4"),
 
     HANDLER: function(data) {
-        if (data.length < 20) {
+
+        if (data.length < 20 || data == DMX.LASTPACKET) {
             return;
         }
 
@@ -31,7 +36,7 @@ var DMX = module.exports = {
         var offset = data.readUInt8(16, true);
         var length = data.readUInt8(17, true);
 
-        //var rawData = [];
+        var rawData = [];
 
         for (i = 18; i < data.length; i++) {
             var value = data.readUInt8(i);
@@ -44,20 +49,17 @@ var DMX = module.exports = {
 
                 var str = (index + 1) + "=" + value;
 
-                LOGGER.LOG(str)
+                LOGGER.LOG("<<<<<" + str);
                 TCP.EMIT(str);
-                if (args.w) {
-                    var WS = require('./ws.js');
-                    WS.EMIT(str);
-                }
+
             }
 
-            //rawData.push(value);
+            rawData.push(value);
 
         }
 
-        //var packet = { sequence: sequence, physical: physical, universe: universe, offset: offset, length: length, data: rawData };
-
+        var packet = { sequence: sequence, physical: physical, universe: universe, offset: offset, length: length, data: rawData };
+        WS.EMIT(JSON.stringify(packet));
 
 
         if (args.s) {
@@ -73,13 +75,36 @@ var DMX = module.exports = {
         var data = DMX.HEADER.concat(DMX.SEQ).concat(DMX.PHY).concat(DMX.UNIVERSE).concat(DMX.LENGTH).concat(DMX.DATA);
         var buf = new Buffer(data);
         DMX.SOCKET.send(buf, 0, buf.length, DMX.PORT, DMX.HOST, function() {
-            if (args.vv) {
-                //LOGGER.LOG(buf); 
-            }
+            DMX.LASTPACKET = buf;
         });
     },
     WRITETIMER: null,
     SAVE: function() {
         fs.writeFile(DATAFILE, JSON.stringify(DMX.DATA));
+    },
+    TWEEN: function(ch, val, time) {
+
+        time /= 1000;
+
+        var obj = { val : DMX.DATA[ch] };
+
+        var tween = tweenr.to(obj, {
+            val : val,
+            duration : time,
+            delay : 0
+        });
+
+        tween.on('update',function(e){
+            DMX.DATA[ch] = Math.round( e.target.val );
+            DMX.SEND();
+        })
     }
 }
+
+DMX.SOCKET.on('error', LOGGER.ERROR);
+
+DMX.SOCKET.bind(DMX.PORT, function() {
+    LOGGER.LOG('UDP socket binded on port ' + DMX.PORT);
+});
+
+DMX.SOCKET.on('message', DMX.HANDLER);
