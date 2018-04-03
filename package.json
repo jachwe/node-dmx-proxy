@@ -20,6 +20,7 @@
   "dependencies": {
     "express": "^4.13.4",
     "optimist": "^0.6.1",
+    "tweenr": "^2.2.1",
     "ws": "^1.0.1"
   }
 }
